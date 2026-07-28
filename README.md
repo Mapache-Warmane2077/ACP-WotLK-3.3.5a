@@ -1,4 +1,5 @@
 # ACP 3.3.8-WotLK
+**Idiomas:** Español | [English](README.en.md)
 
 **Edición comunitaria no oficial de Addon Control Panel para World of Warcraft 3.3.5a.**
 
