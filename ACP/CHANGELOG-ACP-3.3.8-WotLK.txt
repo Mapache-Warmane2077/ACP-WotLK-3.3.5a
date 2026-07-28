@@ -1,0 +1,965 @@
+================================================================================
+ACP 3.3.8-WotLK  -  Changelog
+Basado en Addon Control Panel 3.3.7 (sylvanaar, Rophy, Saien)
+Destino exclusivo: World of Warcraft 3.3.5a / Interface 30300 / Lua 5.1
+================================================================================
+
+Nota sobre idiomas: los comentarios del codigo, ACP-SelfTest.lua y
+LOCALIZATION-REPORT.txt estan en ingles, siguiendo la convencion del proyecto
+original y para que los archivos de traduccion sean utilizables por
+colaboradores de cualquier idioma. Este changelog esta en espanol.
+
+Este documento cubre cuatro pasadas de trabajo:
+  - Primera pasada: reconstruccion del sistema de localizacion y correccion de
+    los errores heredados de 3.3.7 (secciones 4, 7, 8, 10).
+  - Segunda pasada: correcciones quirurgicas sobre la primera entrega, mas una
+    bateria de pruebas ejecutables (seccion 5).
+  - Tercera pasada: compatibilidad real con las traducciones de 3.3.7 y dos
+    colisiones de nombres (seccion 5bis).
+  - Cuarta pasada: seleccion manual de idioma, por comando y por desplegable
+    (seccion 5ter).
+
+
+--------------------------------------------------------------------------------
+1. RESUMEN
+--------------------------------------------------------------------------------
+
+Esta version no reescribe el addon. Conserva la arquitectura, los nombres de
+frames, la API publica y el formato de ACP_Data de 3.3.7.
+
+Los cambios se concentran en:
+
+  a) Un nucleo de localizacion nuevo, con enUS como fuente canonica y fallback
+     seguro. Desaparece el error "Locale key ... is not provided".
+  b) 13 archivos de idioma completos, con el mismo juego de 94 claves, sin
+     caracteres danados y sin marcadores perdidos.
+  c) Correcciones de errores heredados en ACP.lua.
+  d) Un archivo de pruebas ejecutables, ACP-SelfTest.lua, que WoW nunca carga.
+
+
+--------------------------------------------------------------------------------
+2. ARCHIVOS
+--------------------------------------------------------------------------------
+
+CREADOS
+  ACP-Locale.lua                nucleo del sistema de localizacion
+  ACP-SelfTest.lua              pruebas automaticas, NO se carga desde el TOC
+  localization-enUS.lua         reescrito por completo (fuente canonica)
+  localization-enGB.lua         nuevo
+  localization-enCN.lua         nuevo
+  localization-esMX.lua         nuevo
+  localization-ptBR.lua         nuevo
+  localization-itIT.lua         nuevo
+  localization-template.lua     nuevo, NO se carga desde el TOC
+  CHANGELOG-ACP-3.3.8-WotLK.txt este archivo
+  LOCALIZATION-REPORT.txt       auditoria e informe de pruebas
+
+REESCRITOS (mismo nombre, contenido nuevo)
+  localization-deDE.lua
+  localization-frFR.lua
+  localization-esES.lua
+  localization-ruRU.lua
+  localization-koKR.lua
+  localization-zhCN.lua
+  localization-zhTW.lua
+
+MODIFICADOS
+  ACP.lua     ediciones puntuales acumuladas: 52 primera pasada, 10 segunda,
+              2 tercera, 11 cuarta
+  ACP.xml     ademas del ajuste de textos, el desplegable de ordenacion se
+              movio a la izquierda y se anadio $parentLocaleDropDown
+  ACP.toc     version, orden de carga, metadatos, notas localizadas
+  ACP.xml     2 etiquetas de texto por defecto, sincronizadas con el nuevo enUS
+              ("ReloadUI" -> "Reload UI", "Recurse" -> "Recursive").
+              Ambas se sobrescriben desde Lua en OnLoad; el cambio es solo
+              cosmetico para el caso de que OnLoad no llegue a ejecutarse.
+
+CONSERVADOS SIN CAMBIOS
+  Changelog-ACP-3.3.7.txt   (historico)
+
+ELIMINADOS
+  ACP.iml   archivo de proyecto de IntelliJ IDEA, no forma parte del addon.
+
+El recuento exacto de archivos, y cuales carga el TOC, esta al principio de
+LOCALIZATION-REPORT.txt, calculado sobre la carpeta real y no escrito a mano.
+
+
+--------------------------------------------------------------------------------
+3. SISTEMA DE LOCALIZACION
+--------------------------------------------------------------------------------
+
+API, definida en ACP-Locale.lua:
+
+  ACP:RegisterLocale(codigo, tabla [, esPredeterminado])
+  ACP.L[clave]
+  ACP:GetActiveLocale()
+  ACP:IsLocaleRegistered()
+  ACP:GetLocaleString(clave)      -- idioma activo, sin fallback, puede ser nil
+  ACP:WarnUnknownLocale()         -- solo depuracion, una vez por sesion
+  ACP:ReportMissingLocaleKeys()   -- solo depuracion
+
+Orden de resolucion de ACP.L[clave]:
+
+  traduccion del idioma activo  ->  traduccion enUS  ->  la propia clave
+
+Nunca lanza un error de Lua.
+
+SIN CACHE DE VALORES RESUELTOS. El metametodo __index no hace rawset: con menos
+de cien claves el coste de resolver cada vez es irrelevante, y cachear haria
+invisible cualquier registro posterior para las claves ya leidas. Ademas, cada
+llamada a RegisterLocale o UpdateLocale invalida explicitamente lo que hubiera
+quedado escrito en ACP.L, por si un tercero hubiera escrito ahi directamente.
+
+Memoria: RegisterLocale conserva solo dos tablas, la de enUS y la que coincide
+con GetLocale(). Las once restantes quedan sin referencias y las recoge el
+recolector de basura. No se leen archivos, no se usa dofile ni loadfile, no se
+toca Config.wtf.
+
+Compatibilidad: ACP:UpdateLocale(tabla) sigue existiendo como envoltorio
+obsoleto y fusiona la tabla en el idioma activo, de modo que un archivo de
+traduccion de terceros escrito para 3.3.7 sigue funcionando, y ahora ademas
+gana sobre las cadenas ya leidas.
+
+Orden de carga en el TOC:
+
+  ACP-Locale.lua          (define ACP y el nucleo)
+  localization-*.lua      (13 archivos, enUS primero)
+  ACP.lua                 (logica)
+  ACP.xml                 (interfaz; OnLoad ya encuentra las traducciones)
+
+localization-template.lua y ACP-SelfTest.lua NO estan en el TOC. Un archivo
+.lua que no aparece en el TOC no lo lee el juego nunca.
+
+
+--------------------------------------------------------------------------------
+4. CORRECCIONES DE CODIGO (PRIMERA PASADA)
+--------------------------------------------------------------------------------
+
+4.1  Variable global accidental
+     ACP:AddonList_OnShow hacia  numAddons = #sortedAddonList  sin local, lo que
+     creaba una global. Se comprobo que ninguna otra parte del addon la lee.
+     Ahora es local.
+
+4.2  Prefijo Blizzard incorrecto
+     ACP:ADDON_LOADED comparaba  name:sub(9) == "Blizzard_"  (subcadena desde el
+     caracter 9 hasta el final), lo que practicamente nunca era cierto, de modo
+     que los addons de Blizzard se registraban como propietarios de librerias
+     embebidas. Corregido a  name:sub(1, 9) == "Blizzard_".
+
+4.3  Ultimo addon de la lista excluido
+     En AddonList_OnShow la condicion de proteccion era
+     addonIdx < origNumAddons. Como los addons de Blizzard usan indices
+     estrictamente mayores que origNumAddons, el indice origNumAddons es un
+     addon normal valido, el ultimo de la lista, y quedaba fuera de la logica de
+     proteccion. Corregido a  addonIdx <= origNumAddons.
+     Referencia cruzada: la linea que pinta el estado ya usaba <=, lo que
+     confirma cual era el valor correcto.
+
+4.4  Estado MISSING inalcanzable
+     En ACP:GetAddonStatus la rama generica  elseif reason then  aparecia antes
+     de  elseif reason == "MISSING" then, de modo que MISSING nunca se
+     alcanzaba y los addons ausentes se pintaban en naranja en lugar de rojo.
+     Se movio la rama MISSING delante de la generica. Colores resultantes:
+
+       DISABLED           9d9d9d  gris
+       NOT_DEMAND_LOADED  0070dd  azul
+       MISSING            ff0000  rojo
+       cualquier otro     ff8000  naranja
+       LoD cargable       1eff00  verde
+       cargado y desact.  a335ee  morado
+
+4.5  Tooltip de estado
+     ACP:ShowTooltip hacia  CLR:AddonStatus(self:GetAddonStatus(index)).
+     GetAddonStatus devuelve (color, texto) y AddonStatus(addon, txt) espera un
+     addon, asi que el color se usaba como identificador de addon y el texto se
+     perdia: la linea "Status:" salia vacia. Ahora se consulta una sola vez, se
+     conservan color y texto por separado y se colorea el texto.
+
+4.6  Nombre de funcion mal escrito
+     IsAddonCompatibleWithCurrentIntefaceVersion pasa a llamarse
+     IsAddonCompatibleWithCurrentInterfaceVersion. Se actualizaron las 3
+     llamadas internas y se dejo el alias con el nombre antiguo.
+
+4.7  Categoria plegada: activacion masiva rota
+     ACP:AddonList_Enable recorria la tabla de la categoria con pairs(), de modo
+     que tambien iteraba el campo no numerico .category y llamaba a EnableAddOn
+     o DisableAddOn con el nombre de la categoria. Ahora usa ipairs() y ademas
+     comprueba que la tabla exista.
+
+4.8  Estado de la casilla "Recursive"
+     ACP:ToggleRecursion obtenia el frame de la casilla en una variable local
+     que no usaba, y la casilla nunca reflejaba el valor guardado. Ahora hace
+     SetChecked(not savedVar.NoRecurse).
+
+4.9  getreason() con razones desconocidas
+     Devolvia nil si el cliente no tenia la global ADDON_<RAZON>. Ahora cae en
+     la propia cadena de razon y admite nil como entrada.
+
+4.10 TEXT() eliminado
+     Los cuatro popups usaban TEXT(ACCEPT), TEXT(CANCEL) y TEXT(YES). TEXT() es
+     una funcion identidad heredada de la interfaz clasica. Se sustituyo por las
+     globales directas, que existen en 3.3.5a.
+
+4.11 table.getn() eliminado
+     Tres usos sustituidos por el operador #.
+
+4.12 Criterio de ordenacion independiente del idioma
+     En 3.3.7 los nombres de los criterios se traducian ANTES de usarse como
+     clave de addonListBuilders, y esa cadena traducida se escribia en
+     ACP_Data.sorter. Cambiar el idioma del cliente perdia la seleccion, y el
+     menu salia en orden aleatorio (pairs()). Ahora las claves internas son
+     fijas en ingles y solo se traducen al mostrarse. El menu se construye en
+     orden fijo y despues anade los criterios registrados por terceros.
+
+4.13 Nombres de categoria independientes del idioma
+     Mismo problema con las categorias propias de ACP, que se usan como clave de
+     ACP_Data.collapsed. Ahora las claves internas son fijas y se traducen solo
+     al pintarlas, mediante ACP:LocalizeCategory(). Las categorias que provienen
+     de un addon (autor, X-Category, prefijo del nombre) se muestran tal cual.
+
+4.14 Migracion de datos guardados de 3.3.7
+     Al cargar ACP_Data se traducen de vuelta a claves internas:
+       - ACP_Data.sorter, mediante ACP:MigrateSorterName(), que cubre las 30
+         cadenas distintas que 3.3.7 podia escribir (zhCN, zhTW, koKR, frFR,
+         esES, ruRU y las inglesas). Verificado automaticamente contra el
+         ACP.lua original: ver seccion 9 de LOCALIZATION-REPORT.txt.
+       - ACP_Data.collapsed, para las tres categorias renombradas.
+     Si el valor guardado no se reconoce, ACP vuelve al criterio por defecto sin
+     error, como hacia antes.
+
+4.15 Comandos slash
+     /acp                abre el panel
+     /acp nochildren     alterna la activacion de hijos de carga bajo demanda
+     /acp norecurse      alterna la activacion recursiva de dependencias
+     /acp debug          alterna los mensajes de depuracion (nuevo)
+     /acp help  o  /acp ?  muestra la lista de comandos (nuevo)
+     El argumento se normaliza con trim() y lower().
+
+
+--------------------------------------------------------------------------------
+5. CORRECCIONES DE LA SEGUNDA PASADA
+--------------------------------------------------------------------------------
+
+5.1  Invalidacion de la cache de traducciones
+     El nucleo cacheaba con rawset() cada cadena resuelta, de modo que una
+     llamada posterior a ACP:UpdateLocale() o ACP:RegisterLocale() no
+     reemplazaba las claves ya consultadas. Se elimino la cache por completo y
+     ademas cada registro invalida explicitamente lo que hubiera en ACP.L. El
+     orden de fallback no cambia. Prueba 1 de ACP-SelfTest.lua.
+
+5.2  /acp debug
+     La comprobacion de idioma desconocido estaba en OnLoad, donde ACP.debug
+     siempre vale false, asi que no se mostraba nunca. Se elimino de OnLoad. El
+     aviso lo emite ahora ACP:WarnUnknownLocale(), que se llama en el momento en
+     que el usuario activa /acp debug, y solo una vez por sesion.
+     El modo de depuracion NO se guarda en ACP_Data: es deliberado, cada sesion
+     empieza con la depuracion apagada. Consecuencia: /acp debug seguido de
+     /reload vuelve a dejarlo apagado, y ya no hace falta esa secuencia para ver
+     el aviso. El plan de pruebas se corrigio en consecuencia (12.3).
+
+5.3  Sincronizacion de la casilla Recursive
+     /acp norecurse modificaba savedVar.NoRecurse directamente, saltandose la
+     funcion que actualiza la casilla. Ahora llama a ACP:ToggleRecursion(), la
+     misma que usa el OnClick de la casilla, de modo que el SavedVariable, la
+     casilla y el mensaje del chat no pueden divergir. Funciona con la ventana
+     abierta y cerrada, y tambien si la ventana no existe todavia.
+     Prueba 5 de ACP-SelfTest.lua.
+
+5.4  Renombrado vacio de conjuntos
+     Al borrar el nombre personalizado el mensaje decia "[nil]". Ahora, despues
+     de asignar el nombre, se vuelve a pedir el nombre visible con
+     self:GetSetName(set), que devuelve "Set 1", "Set 2", etc.
+     Prueba 3 de ACP-SelfTest.lua.
+
+5.5  ACP.CheckEvents restaurado
+     Se habia eliminado por no usarse, pero formaba parte de la tabla global
+     publica de 3.3.7. Se restaura como  ACP.CheckEvents = ACP.CheckEvents or 0
+     y se marca como obsoleto en un comentario. ACP no lo lee.
+
+5.6  Textos visibles que seguian en ingles
+     Se localizaron los cinco mensajes que quedaban incrustados:
+       "Untranslated key: %s"
+       "No untranslated key has been requested so far."
+       "No translation is registered for locale %s, using %s."
+       "Cannot find AddOn %s."                      (error de GetAddonIndex)
+       "GetAddonIndex(): addon must be a number or a string."
+     Los dos ultimos son mensajes de error() de Lua. Nota honesta: hoy son
+     defensivos y no se alcanzan, porque GetAddonIndex() es una funcion local
+     y las dos llamadas internas que existen le pasan noerr = true. Se
+     localizan de todas formas para que, si alguna vez se alcanzan con
+     scriptErrors activado, el usuario los lea en su idioma.
+     Para evitar recursion al traducir el propio aviso de clave ausente, el
+     nucleo usa un helper interno raw(), que consulta directamente activeStrings
+     y defaultStrings sin pasar por ACP.L y sin disparar el aviso.
+
+5.7  Estados gramaticales separados
+     ENABLED y DISABLED estan traducidos en plural porque concuerdan con
+     "AddOns" en el mensaje de categoria plegada ("todos sus AddOns pasan a
+     ACTIVADOS"). Reutilizarlos para opciones sueltas daba frases incorrectas.
+     Se anadieron dos estados neutros nuevos, ON y OFF, que usan la depuracion,
+     la recursion y los hijos LoD. En espanol y portugues se traducen como
+     SI/NO y SIM/NAO para evitar el genero; en aleman AN/AUS, en frances
+     OUI/NON, en ruso VKL/VYKL, en coreano y chino los equivalentes locales.
+     Ademas, en los idiomas donde "es ahora SI" sonaba forzado, el mensaje se
+     reformulo como etiqueta y valor: "Activacion recursiva: SI".
+     ENABLED y DISABLED se conservan intactos para el mensaje de categoria.
+
+5.8  Notas del TOC en UTF-8 real
+     Las notas localizadas estaban transliteradas (Anade, boton, menu, Fuegt,
+     Schaltflaeche, Portugues). Ahora usan los caracteres reales en aleman,
+     frances, espanol, portugues e italiano. El archivo sigue siendo UTF-8 sin
+     BOM con finales CRLF.
+
+5.9  ACP:MigrateSorterName()
+     La migracion del criterio de orden estaba escrita en linea dentro de
+     OnEvent, donde no se puede probar. Se extrajo a una funcion publica, que es
+     la que ahora usa OnEvent y la que verifican las pruebas.
+
+
+--------------------------------------------------------------------------------
+5bis. CORRECCIONES DE LA TERCERA PASADA
+--------------------------------------------------------------------------------
+
+5bis.1  Compatibilidad real con las traducciones de ACP 3.3.7
+     ACP:UpdateLocale() aceptaba las tablas antiguas, pero en este addon la
+     cadena inglesa ES la clave, y 3.3.8 corrigio parte de ese ingles. Una
+     tabla de 3.3.7 rellenaba por tanto claves que 3.3.8 ya no consulta:
+     definia ["ReloadUI"] mientras el codigo pedia L["Reload UI"].
+
+     Se anadio LEGACY_LOCALE_KEY_ALIASES en ACP-Locale.lua y una funcion de
+     normalizacion que se aplica UNICAMENTE a lo que entra por UpdateLocale.
+     Las 13 tablas canonicas pasan por RegisterLocale y no la tocan nunca, de
+     modo que ninguna clave antigua entra en ellas.
+
+     El mapa no se copio de una lista: se obtuvo comparando el juego completo
+     de claves del localization-enUS.lua de 3.3.7 con el de 3.3.8. De las 22
+     claves que 3.3.7 definia y 3.3.8 ya no usa:
+       - 17 son renombrados simples y estan en la tabla de alias
+       - 1 es "Set ", que necesita construir "Set %d"
+       - 2 son las dos mitades del tooltip de proteccion, que ahora es una
+         sola frase
+       - 2 se eliminaron a proposito: Blizzard_FeedbackUI y Blizzard_VehicleUI
+         no estan en ACP_BLIZZARD_ADDONS y 3.3.8 no las muestra
+     La seccion 9 de LOCALIZATION-REPORT.txt recalcula esa cobertura en cada
+     compilacion y falla si aparece una clave sin cubrir.
+
+     Reglas aplicadas:
+       - la clave nueva solo se rellena si la tabla antigua trae la vieja y NO
+         trae explicitamente la nueva
+       - una traduccion dada directamente con la clave nueva siempre gana
+       - la clave antigua se conserva por si algun codigo externo la lee
+       - "Set " se convierte en "Set %d" concatenando el marcador al final, lo
+         que reproduce byte a byte lo que hacia 3.3.7 con L["Set "] .. numero,
+         incluido el separador que eligiera cada traductor ("Perfil " da
+         "Perfil %d")
+       - las dos lineas del tooltip se unen recortando el espacio final de la
+         primera y el inicial de la segunda; si la tabla solo trae una de las
+         dos, se usa esa y nunca se produce nil ni un espacio doble
+
+5bis.2  Colision de titulos con nombres de carpeta
+     ACP:ShowTooltip aplicaba  title = self:GetLocaleString(name) or title  a
+     TODOS los addons. Una carpeta llamada como una clave de idioma se
+     renombraba sola: en esES un addon en la carpeta "Author" con titulo
+     "Original AddOn Title" aparecia como "Autor".
+     Ahora se calcula un booleano isBlizzardEntry ANTES de convertir el indice
+     en nombre de carpeta, y la sustitucion localizada solo se aplica a las
+     filas de Blizzard.
+     Diferencia deliberada respecto a la propuesta de la revision: el booleano
+     no se limita a  type(index) == "number" and index > GetNumAddOns(). La
+     interfaz llama a ShowTooltip con obj.addon, que para las filas de
+     Blizzard es el NOMBRE de la carpeta, no un numero; con la version
+     estrictamente numerica los addons de Blizzard habrian perdido su titulo
+     traducido. Se reconocen las dos formas: indice numerico por encima de
+     GetNumAddOns(), o cadena presente en ACP_BLIZZARD_ADDONS.
+     Verificado con Author, Status, Default, Libraries, Reload y Unknown.
+     ACP:AddonList_OnShow ya hacia lo correcto: alli la sustitucion estaba
+     dentro de la rama  addonIdx > origNumAddons, asi que no se toco.
+
+5bis.3  La global _ ya no se modifica
+     playerClass, _ = UnitClass("player")  escribia en la global _, que otros
+     addons usan como variable de descarte. Ahora es una sola asignacion:
+     playerClass = UnitClass("player). El segundo valor no se usaba.
+     La auditoria de globales se amplio: antes solo detectaba la CREACION de
+     globales nuevas y por eso no veia este caso, porque la expresion tiene
+     varios destinos separados por coma. Ahora analiza todos los destinos de
+     una asignacion multiple, de modo que sobrescribir una global preexistente
+     tambien se reporta.
+
+--------------------------------------------------------------------------------
+5ter. CUARTA PASADA: SELECCION MANUAL DE IDIOMA
+--------------------------------------------------------------------------------
+
+El problema. En un cliente 3.3.5a con traduccion comunitaria, tanto
+GetLocale() como GetCVar("locale") pueden seguir devolviendo enUS aunque el
+juego este en portugues. La deteccion automatica no puede funcionar ahi: no
+existe ninguna senal fiable dentro de la API de 3.3.5a. La unica solucion
+correcta es dejar que el usuario lo diga.
+
+5ter.1  Conservacion de todas las tablas de idioma
+     Hasta ahora RegisterLocale se quedaba solo con enUS y con la tabla que
+     coincidiera con GetLocale(); las demas se soltaban para ahorrar memoria.
+     Eso hacia imposible elegir ptBR mas tarde, porque cuando llegan las
+     SavedVariables la tabla ptBR ya no existe.
+     Ahora se conservan las 13 en ACP.Locales[codigo]. Son unas cien cadenas
+     cortas por idioma; el coste es pequeno y es lo que permite cambiar de
+     idioma sin volver a cargar archivos. Se sigue sin leer Config.wtf, sin
+     dofile y sin loadfile.
+
+5ter.2  Idioma detectado frente a idioma efectivo
+     Son dos cosas distintas y ahora se pueden consultar por separado:
+       ACP:GetDetectedLocale()   siempre el resultado crudo de GetLocale()
+       ACP:GetEffectiveLocale()  el que ACP usa de verdad
+       ACP:GetActiveLocale()     alias del efectivo
+     Resolucion:
+       ACP_Data.localeOverride, si esta registrado
+       -> GetLocale(), si esta registrado
+       -> enUS
+     Cambio de contrato: GetActiveLocale() devolvia antes el codigo crudo de
+     WoW. Ahora devuelve el efectivo. Es lo que su nombre siempre prometio y
+     lo que necesita el resto del addon; GetDetectedLocale() cubre el otro
+     caso. Dos aserciones de las pruebas se actualizaron por esto, no por un
+     fallo.
+     Del mismo modo, IsLocaleRegistered() se refiere al idioma DETECTADO, que
+     es de lo que trata el aviso de depuracion.
+
+5ter.3  API nueva
+       ACP:SetLocale(codigo)        fuerza un idioma, devuelve ok, codigo
+       ACP:ClearLocaleOverride()    vuelve a la deteccion automatica
+       ACP:GetLocaleOverride()      seleccion manual, o nil
+       ACP:GetRegisteredLocales()   codigos con tabla, en orden de pantalla
+       ACP:GetLocaleName(codigo)    nombre nativo
+       ACP:NormalizeLocaleCode(c)   "ptbr" -> "ptBR", nil si no existe
+       ACP:RestoreLocaleOverride()  aplica ACP_Data.localeOverride
+       ACP:SelectLocale(codigo)     punto de entrada unico del comando y del
+                                    desplegable, incluye guardado y popup
+       ACP:GetSavedVariables()      acceso de lectura a ACP_Data
+       ACP:ApplyLocaleToUI()        reescribe los textos ya asignados
+
+5ter.4  Comandos
+       /acp locale                muestra idioma detectado, idioma efectivo,
+                                  seleccion manual y los comandos disponibles
+       /acp locale ptBR           fuerza ese idioma
+       /acp locale auto           vuelve a la deteccion automatica
+       /acp language              alias de /acp locale
+     El codigo no distingue mayusculas: ptbr, PTBR y ptBR resuelven a ptBR, y
+     se ignoran los espacios sobrantes. Un codigo sin tabla registrada NO se
+     guarda: se muestra el mensaje localizado "El idioma %s no esta
+     disponible." y no se toca nada. Un error de escritura no puede dejar a
+     ACP sin cadenas.
+     /acp help incluye las tres formas.
+
+5ter.5  Persistencia
+     Se anade UN campo nuevo a ACP_Data:
+       localeOverride    nil = automatico, "ptBR" = idioma forzado
+     No se elimina ni se renombra ningun campo existente. Un ACP_Data escrito
+     por 3.3.7 o por cualquier entrega anterior de 3.3.8 simplemente no tiene
+     el campo, que es exactamente el valor que significa "automatico".
+     Un override que apunte a un idioma cuyo archivo ya no esta NO se borra de
+     ACP_Data: el idioma efectivo cae al detectado o a enUS, y la seleccion
+     vuelve a funcionar sola si el archivo reaparece.
+
+5ter.6  Momento de aplicacion
+     Los archivos Lua se cargan mucho antes de que existan las SavedVariables,
+     asi que el orden es: registrar los 13 idiomas -> usar GetLocale()
+     provisionalmente -> en VARIABLES_LOADED aplicar localeOverride ->
+     reescribir los textos.
+     Para eso, todas las asignaciones de texto salieron de OnLoad a
+     ACP:ApplyLocaleToUI(), que se llama en OnLoad, en VARIABLES_LOADED y en
+     cada cambio de idioma. Botones, casilla Recursive, desplegables y el
+     boton AddOns del menu de juego cambian en el acto.
+     Lo que NO cambia sin recargar son las filas de la lista ya pintadas, que
+     se redibujan en el siguiente OnShow. Por eso el cambio de idioma muestra
+     un popup con "Recargar ahora" y "Mas tarde". "Mas tarde" cierra el popup
+     sin perder la seleccion, que ya esta guardada.
+
+5ter.7  Selector visual
+     Nuevo desplegable $parentLocaleDropDown, en la misma linea que el de
+     ordenacion e inmediatamente a su derecha, con el mismo template
+     (UIDropDownMenuTemplate) y por tanto la misma altura y el mismo estilo.
+     Para hacerle sitio, el desplegable de ordenacion se movio de x=280 a
+     x=45; ese espacio estaba vacio. Geometria resultante, sobre una ventana
+     de 640 px:
+       ordenacion   x  45 .. 210
+       idioma       x 210 .. 430
+       boton cerrar x 566 .. 598
+     Quedan 136 px libres antes del boton de cerrar. La seccion 11 de
+     LOCALIZATION-REPORT.txt recalcula esas posiciones desde el XML y desde
+     las llamadas a UIDropDownMenu_SetWidth, y falla si algo se solapa.
+
+     El texto del desplegable cerrado es el NOMBRE NATIVO del idioma efectivo:
+     "Portugues (Brasil)", "Espanol (Latinoamerica)", "Deutsch". Nunca la
+     palabra generica.
+     La palabra generica "Language" es el tooltip, y esa si esta traducida:
+     Idioma, Sprache, Langue, Lingua, Yazyk, eoneo, yuyan.
+     La primera entrada del menu es "Automatic - enUS": solo se traduce la
+     palabra, el codigo detectado se muestra tal cual.
+     Los 13 idiomas aparecen SIEMPRE en su forma nativa, sea cual sea el
+     idioma actual de ACP. Es deliberado: si alguien elige por error un idioma
+     que no entiende, tiene que poder reconocer el suyo en la lista para
+     volver.
+
+5ter.8  API usada
+     UIDropDownMenuTemplate, UIDropDownMenu_Initialize, _CreateInfo,
+     _AddButton, _SetSelectedValue, _SetWidth, StaticPopupDialogs,
+     StaticPopup_Show y ReloadUI. Todo existe en 3.3.5a.
+     Aviso: UIDropDownMenu_SetWidth cambio de firma en el parche 3.0. Aqui se
+     usa la de WotLK, (frame, ancho [, relleno]). Es correcta para 3.3.5a pero
+     no se pudo comprobar dentro del cliente; esta en la lista de pruebas
+     manuales (12.14).
+
+--------------------------------------------------------------------------------
+6. IDIOMAS: LO QUE ESTA TRADUCIDO Y LO QUE SOLO ESTA RECONOCIDO
+--------------------------------------------------------------------------------
+
+Son dos cosas distintas y conviene no confundirlas.
+
+TRADUCIDO. 13 idiomas con archivo propio y traduccion completa de las 109
+claves, sin ninguna clave faltante:
+
+  enUS  enGB  enCN  deDE  frFR  esES  esMX  ptBR  itIT  ruRU  koKR  zhCN  zhTW
+
+RECONOCIDO. El nucleo no tiene lista cerrada: acepta cualquier codigo de cuatro
+caracteres, oficial o inventado. Eso significa unicamente que se puede registrar
+un archivo para ese codigo sin tocar ACP.lua. NO significa que exista
+traduccion.
+
+Si GetLocale() devuelve un codigo sin archivo propio (por ejemplo plPL, trTR,
+csCZ, ukUA, huHU, roRO, nlNL, jaJP), ACP arranca con normalidad y muestra TODO
+en ingles. No hay error, no hay cadenas vacias y no hay aviso salvo que el
+usuario active /acp debug.
+
+El selector manual solo ofrece idiomas REGISTRADOS. No permite elegir un
+codigo sin traduccion, precisamente para que no se pueda dejar a ACP sin
+cadenas. Si se anade un archivo nuevo, aparece en el desplegable sin tocar
+ninguna otra cosa.
+
+Para anadir un idioma: copiar localization-template.lua, renombrarlo con el
+codigo, traducir y anadir el archivo al TOC. No hay que tocar el nucleo.
+
+
+--------------------------------------------------------------------------------
+7. CADENAS
+--------------------------------------------------------------------------------
+
+Juego canonico: 109 claves, identicas en los 13 idiomas.
+Las claves SON la cadena inglesa corregida, de modo que el ultimo fallback
+(mostrar la clave) siempre produce ingles legible.
+
+Textos que estaban incrustados en el codigo y ahora estan localizados:
+
+  Criterios de orden   Default, Titles, Ace2, Author, Separate LoD List,
+                       Group By Name
+  Categorias           Blizzard, Blizzard AddOns, Standard AddOns,
+                       Load on Demand AddOns, Libraries, Undefined, Unknown
+  Mensajes             "%s is collapsed. Setting all of its AddOns to %s.",
+                       ENABLED, DISABLED, ON, OFF
+  Tooltip              Compatible
+  Comandos slash       Valid commands:, y las cuatro descripciones de comando
+  Diagnostico          los cinco mensajes de la seccion 5.6
+  Selector de idioma   las quince cadenas de la seccion 5ter (Language,
+                       Automatic, los tres informes de /acp locale, el error
+                       de idioma no registrado, los dos mensajes de cambio,
+                       el aviso de recarga, los dos botones del popup y las
+                       tres descripciones de comando)
+
+Los NOMBRES de los idiomas (English, Deutsch, Portugues (Brasil), ...) NO son
+claves de traduccion. Son metadatos en ACP-Locale.lua y se muestran siempre en
+su forma nativa, en cualquier idioma de la interfaz.
+
+Correcciones del ingles principal:
+
+  dependancies                  -> dependency
+  behaviour                     -> behavior (enUS) / behaviour (enGB)
+  "Addons" como sustantivo      -> "AddOns"
+  reloadui / reloadUI           -> "Reload UI"
+  "Loadable OnDemand"           -> "Loadable on demand"
+  "Disabled on reloadUI"        -> "Disabled after Reload UI"
+  "Embeds" / "Active Embeds"    -> "Embedded Libraries" /
+                                   "Active Embedded Libraries"
+  "Addons [%s] Saved."          -> "AddOn set [%s] saved."   (idem loaded /
+                                   unloaded / renamed)
+  L["Set "] .. numero           -> L["Set %d"]:format(numero)
+  "number of string"            -> "a number or a string"
+
+Convencion terminologica adoptada:
+
+  AddOn / AddOns            (mayuscula interna, forma de Blizzard)
+  Reload UI                 (accion), Reload (verbo suelto)
+  load on demand / LoD      (nunca "OnDemand" pegado)
+  Dependencies
+  Embedded Libraries        (antes "Embeds")
+  Protected AddOns
+  AddOn set                 (antes solo "Addons [x]")
+
+Dos claves de 3.3.7 se fusionaron en una sola:
+  "Click to enable protect mode. Protected addons will not be disabled" +
+  "when performing a reloadui."
+  ->
+  "Click to toggle protected mode. Protected AddOns are re-enabled
+   automatically when you reload the UI."
+Motivo: partir una frase en dos claves impide traducirla con orden de palabras
+correcto en aleman, ruso, coreano y chino. Ahora es una sola linea con ajuste
+automatico (quinto argumento de GameTooltip:AddLine).
+
+Claves de titulos de Blizzard: se alinearon exactamente con la lista
+ACP_BLIZZARD_ADDONS de ACP.lua (23 entradas). Se anadieron Blizzard_ArenaUI,
+Blizzard_DebugTools y Blizzard_GMChatUI, que faltaban, y se quitaron
+Blizzard_FeedbackUI y Blizzard_VehicleUI, que no existen en esa lista.
+Ademas ahora SI se usan: si el idioma activo tiene traduccion para el nombre de
+carpeta, se muestra como titulo; si no, se usa el titulo que devuelve el
+cliente. Nunca se traduce el nombre de la carpeta.
+
+
+--------------------------------------------------------------------------------
+8. DECISIONES DE COMPATIBILIDAD
+--------------------------------------------------------------------------------
+
+- No se introduce ninguna API posterior a 3.3.5a. La auditoria comprueba
+  explicitamente C_AddOns, C_Timer, C_CVar, Settings, BackdropTemplate, mixins,
+  table.pack/unpack, string.pack, math.type, table.move, goto y ::etiquetas::.
+  Resultado: ninguna coincidencia en los archivos que carga el TOC.
+
+- Ademas se comprueba que no exista sintaxis exclusiva de Lua 5.2 o posterior
+  (// << >> & | goto ::) fuera de literales de cadena, para que el hecho de que
+  los archivos compilen con el interprete disponible sirva tambien para el
+  Lua 5.1 del cliente.
+
+- ## Interface: 30300 se mantiene.
+
+- ## X-Compatible-With: 40000 se ELIMINA. Esta rama es solo para 3.3.5a y
+  declarar compatibilidad con Cataclysm era falso. Efecto secundario
+  comprobado: ACP lee esa etiqueta de si mismo a traves de
+  ACP.TAGS.INTERFACE_MAX_ORG. Al quitarla, la compatibilidad de ACP se sigue
+  resolviendo con ## X-Since-Interface: 30300, que se conserva.
+
+- ## X-Curse-Packaged-Version se elimina: es metadato de empaquetado de Curse.
+
+- ## SavedVariables: ACP_Data se mantiene. Ningun campo existente se elimina,
+  se renombra ni cambia de tipo: AddonSet, ProtectedAddons, collapsed, sorter,
+  NoRecurse, NoChildren y reloadRequired siguen igual. Solo se normalizan los
+  VALORES de sorter y de las claves de collapsed, con migracion automatica.
+  Los conjuntos guardados por usuarios de 3.3.7 no se tocan.
+  La cuarta pasada ANADE un campo opcional, localeOverride. Su ausencia es un
+  valor valido y significa deteccion automatica, que es exactamente lo que
+  tienen los datos antiguos, asi que no hay migracion que hacer.
+  El modo de depuracion sigue SIN guardarse en ACP_Data.
+
+- La carpeta principal sigue llamandose ACP.
+
+- Codificacion: todos los archivos CREADOS O MODIFICADOS en 3.3.8 son UTF-8
+  valido, sin BOM y con finales de linea CRLF. Se elimino el BOM del TOC y de
+  los archivos frFR, koKR, ruRU y zhTW de 3.3.7. Quitar el BOM es la opcion
+  segura: un TOC o un .lua sin BOM se analiza correctamente en todos los casos.
+  No se usa UTF-16 en ningun archivo.
+  Unica excepcion, deliberada: Changelog-ACP-3.3.7.txt se conserva BYTE A BYTE
+  tal como venia en el paquete original, y por tanto mantiene sus finales LF.
+  Es un documento historico; normalizarlo habria cambiado el archivo solo para
+  que una frase de este changelog fuese mas comoda. La seccion 3 de
+  LOCALIZATION-REPORT.txt lo indica explicitamente contando sus lineas LF.
+
+
+--------------------------------------------------------------------------------
+9. TRADUCCIONES CON INCERTIDUMBRE
+--------------------------------------------------------------------------------
+
+Se senalan para revision por hablantes nativos y por pruebas en pantalla.
+
+ANCHO DE BOTON. "Sets" es un boton de 40 px y los de accion son de 80 px. Se
+priorizo la brevedad sobre la literalidad:
+  - esES / esMX / frFR / ptBR / itIT: "Sets" / "Set" se deja como prestamo, en
+    lugar de "Perfiles", "Conjuntos", "Insiemi", que se salen del boton.
+  - esES / esMX "Desact. todos", ptBR "Desat. todos", itIT "Disatt. tutti",
+    frFR "Tout desact." usan abreviatura. Verificar visualmente.
+  - ruRU: "Reload UI" y "Sets" usan formas abreviadas.
+
+ABREVIATURAS TECNICAS:
+  - esES "Lista CbD aparte" (CbD = carga bajo demanda). 3.3.7 usaba "CaD", que
+    no es una abreviatura establecida. Se puede preferir "Lista LoD aparte".
+  - ruRU "ZPT" se hereda de 3.3.7; no es estandar.
+  - koKR el nombre del criterio LoD es largo para un desplegable.
+
+ESTADOS ON / OFF:
+  - En espanol y portugues se eligieron SI / NO y SIM / NAO para evitar el
+    genero. En italiano SI / NO. Si se prefiere ACTIVADO / DESACTIVADO en
+    masculino, hay que revisar cada mensaje que los use.
+
+TERMINOLOGIA:
+  - ruRU: 3.3.7 usaba "Modifikatsii" para AddOns. Se cambio a "Addony", mas
+    habitual entre jugadores rusos. Es un cambio deliberado.
+  - itIT: se usa "AddOn" invariable en plural, uso comun en italiano.
+  - esMX se derivo de esES con diferencias reales de registro (Predeterminado,
+    contraido, Da clic, Peluqueria, Monedas). Un hablante de LATAM deberia
+    revisar si quiere mas divergencia.
+
+TITULOS DE BLIZZARD: son descriptivos, no cadenas oficiales del cliente.
+
+enGB solo difiere de enUS en "behaviour". enCN es identico a enUS por diseno:
+es para clientes chinos parcheados a ingles.
+
+
+--------------------------------------------------------------------------------
+10. CODIGO MUERTO
+--------------------------------------------------------------------------------
+
+ELIMINADO (locales de archivo sin ninguna referencia, ni en Lua ni en XML):
+  local eventLibrary, bugeventreged   nunca se leian ni asignaban
+  local function build_string(...)    nunca se llamaba
+  local function iterate_over(...)    nunca se llamaba (existe
+                                      recursive_iterate_over, que si se usa)
+  local pos = 1                       en el constructor Separate LoD List
+  local frame = ...                   en ToggleRecursion; la variable se
+                                      conecto de verdad (ver 4.8)
+  ACP:UpdateLocale                    se movio a ACP-Locale.lua como envoltorio
+                                      obsoleto, no se perdio
+
+RESTAURADO EN LA SEGUNDA PASADA:
+  ACP.CheckEvents                     ver 5.5
+
+CONSERVADO A PROPOSITO:
+  StaticPopupDialogs["ACP_RELOADUI"]  No se invoca desde ACP ni desde el XML,
+      pero registrar un popup es publicar un identificador global: cualquier
+      addon o macro puede hacer StaticPopup_Show("ACP_RELOADUI"). Borrarlo seria
+      romper una interfaz publica sin poder demostrar que nadie la usa.
+  ACP:SortDropDown_OnClick(sorter)    funcion publica vacia, punto de extension.
+  ACP:FindAddonKey(list, name)        funcion publica sin uso interno.
+  ACP:ToggleUI()                      documentada en el propio codigo como punto
+                                      de entrada para CustomMenuFu.
+  Bloque comentado ACP:ProcessBugSack y la rama comentada de ACP_EnableRecurse.
+      Se conservan, con las claves L[...] actualizadas al nuevo enUS. Las cuatro
+      claves que solo usa ese codigo estan marcadas como "Reserved".
+  Bloque comentado addonListBuilders["Ace2 Libs And Packages"].
+  Bloque comentado ACP:OnKeyDown.
+
+
+--------------------------------------------------------------------------------
+11. PRUEBAS REALIZADAS
+--------------------------------------------------------------------------------
+
+NINGUNA PRUEBA DE ESTA SECCION SE EJECUTO DENTRO DE WORLD OF WARCRAFT.
+No hubo acceso a un cliente 3.3.5a en ningun momento.
+
+Lo que SI se ejecuto de verdad (detalle en LOCALIZATION-REPORT.txt):
+
+  a) Compilacion real de los 17 archivos .lua con un interprete Lua
+     (texlua, Lua 5.3). Todos compilan.
+     Salvedad honesta: el interprete disponible es 5.3, no el 5.1 del cliente.
+     Para que ese resultado sea trasladable, la auditoria comprueba ademas que
+     no exista sintaxis exclusiva de 5.2+ (// << >> & | goto ::) fuera de
+     cadenas. No la hay. Si se dispone de lua5.1, conviene confirmar con:
+
+         luac5.1 -p ACP-Locale.lua ACP.lua localization-*.lua
+
+  b) Ejecucion real de ACP-SelfTest.lua, que carga el nucleo, los 13 idiomas y
+     ACP.lua con la API de WoW simulada, y ejecuta 129 comprobaciones sobre:
+       1. traduccion consultada antes y despues de ACP:UpdateLocale, y tambien
+          de ACP:RegisterLocale, sin perder el orden de fallback
+       2. fallback de un codigo desconocido (plPL), aviso emitido una sola vez,
+          mensaje de clave sin traducir localizado y no recursivo
+       3. renombrado de conjunto con nombre vacio
+       4. migracion de los valores historicos de ACP_Data.sorter
+       5. sincronizacion logica de NoRecurse con la casilla, por comando y por
+          funcion, con la ventana creada y sin crear
+       6. igualdad de claves y marcadores en los 13 idiomas
+       7. una tabla de traduccion REAL de ACP 3.3.7 (la esES completa, copiada
+          verbatim con su mojibake incluido) traducida a traves de
+          UpdateLocale: claves renombradas, "Set " -> "Set %d", tooltip
+          partido, prioridad de la clave nueva, y que los alias no se filtren
+          a los archivos canonicos
+       8. colision de titulos: carpetas llamadas Author, Status, Default,
+          Libraries, Reload y Unknown conservan su titulo real, y las filas de
+          Blizzard siguen traducidas tanto por indice como por nombre
+       9. ACP:OnLoad() no escribe en la global _
+      10. seleccion manual de idioma: sin override se usa el detectado; con
+          override ptBR sobre un cliente que dice enUS se usan las cadenas
+          ptBR; un override inexistente cae a enUS sin borrarse; auto lo
+          elimina; ptbr/eses/ZHTW se normalizan; un codigo desconocido no se
+          guarda; un ACP_Data antiguo sin el campo funciona y no se altera;
+          los 13 idiomas son seleccionables
+      11. desplegable visual: 14 entradas, nombres nativos, la entrada
+          automatica muestra el codigo detectado, elegir ptBR guarda
+          exactamente "ptBR", el popup se abre, "Recargar ahora" llama a
+          ReloadUI(), la marca de seleccion sigue a ACP_Data, el texto cerrado
+          es el nombre nativo y el tooltip es la palabra generica traducida
+     Resultado: 129 correctas, 0 fallidas.
+
+     Estas pruebas no son decorativas: ejecutadas contra la version anterior a
+     esta pasada, con los tres arreglos revertidos, fallan 15 de ellas.
+
+     Para repetirlas:
+         cd <carpeta ACP>
+         lua5.1 ACP-SelfTest.lua        (o texlua ACP-SelfTest.lua)
+
+  c) Verificacion de la migracion contra el ACP.lua ORIGINAL de 3.3.7: se
+     extraen del codigo fuente antiguo las 30 cadenas distintas que podia
+     escribir en ACP_Data.sorter y se comprueba que ACP:MigrateSorterName()
+     devuelve un constructor vivo para todas.
+
+  d) Geometria de la fila de cabecera: las posiciones de los dos desplegables
+     y del boton de cerrar se recalculan desde el XML y desde las llamadas a
+     UIDropDownMenu_SetWidth, y se comprueba que estan en la misma linea, que
+     no se solapan entre si ni con el boton de cerrar y que no se salen de la
+     ventana.
+
+  e) Cobertura de las claves de 3.3.7: se comparan los dos localization-enUS
+     y se comprueba que las 22 claves que 3.3.8 dejo de usar estan todas
+     cubiertas (17 alias, 3 casos especiales, 2 eliminadas a proposito), y que
+     ninguna clave antigua se colo en los 13 archivos canonicos.
+
+  f) Auditoria estatica: 22 archivos, 17 Lua de los cuales 15 los carga el TOC;
+     13 idiomas x 109 claves sin faltantes, sobrantes, duplicadas ni vacias;
+     0 discrepancias de marcadores; UTF-8 sin BOM ni U+FFFD; el TOC no lista
+     ningun archivo inexistente y ningun archivo de idioma quedo fuera; los
+     unicos nombres que ACP.lua asigna a nivel de sentencia son ACP,
+     ACP_LINEHEIGHT, ACP_EnableRecurse y SLASH_ACP1.
+
+Lo que NO cubre nada de lo anterior: renderizado, anchos reales de boton, orden
+de eventos del cliente, comportamiento de la API real de WoW, tooltips, scroll
+y todo lo visual.
+
+
+--------------------------------------------------------------------------------
+12. PRUEBAS PENDIENTES DENTRO DEL CLIENTE 3.3.5a
+--------------------------------------------------------------------------------
+
+Preparacion:
+
+    /console scriptErrors 1
+    /reload
+    /run print(GetLocale())
+
+12.1 Arranque
+     - Iniciar sesion. No debe aparecer ningun error de Lua.
+     - El boton "AddOns" debe aparecer en el menu de juego (Esc), traducido.
+     - Abrir con el boton y con /acp. Cerrar con el boton Close, con el aspa y
+       con Escape.
+
+12.2 Traducciones
+     - Comprobar que todos los botones caben y no se solapan: Sets (40 px),
+       Disable All, Enable All, Reload UI, Close, Load (80 px).
+     - Pasar el raton por una fila: Author, Version, Status, Dependencies,
+       Embedded Libraries, Active Embedded Libraries, Memory Usage, Compatible.
+     - Pasar el raton por el icono de escudo y por la casilla de activacion:
+       las dos frases largas deben ajustarse a varias lineas sin cortarse.
+     - Repetir en al menos un cliente no ingles.
+
+12.3 Fallback de traducciones y modo de depuracion
+     - En un cliente con codigo desconocido, o renombrando temporalmente el
+       archivo del idioma activo, ACP debe arrancar en ingles sin ningun error.
+     - Escribir /acp debug. El aviso de idioma sin traduccion debe aparecer EN
+       ESE MOMENTO, una sola vez. NO hay que hacer /reload: el modo de
+       depuracion no se guarda y cada sesion empieza apagado.
+     - Volver a escribir /acp debug para apagarlo. Sin depuracion no debe
+       imprimirse ningun mensaje de clave sin traducir.
+     - /run ACP:ReportMissingLocaleKeys() para listar lo que haya faltado.
+
+12.4 Cliente con codigo personalizado
+     - En un cliente chino parcheado a ingles, /run print(GetLocale()) deberia
+       devolver enCN y la interfaz debe salir en ingles.
+     - Para probar un codigo cualquiera: copiar localization-template.lua,
+       ponerle un codigo inventado, anadirlo al TOC y verificar que se aplica.
+
+12.5 Activar y desactivar
+     - Marcar y desmarcar addons sueltos.
+     - Enable All y Disable All.
+     - Con SHIFT pulsado al marcar, para invertir la recursion.
+     - Con CTRL pulsado, para invertir el tratamiento de hijos LoD.
+     - Marcar un addon dentro de una categoria PLEGADA: debe imprimirse el
+       mensaje "X esta plegado..." con ACTIVADOS o DESACTIVADOS en plural, y
+       aplicarse a todos los addons de esa categoria. Esta ruta estaba rota en
+       3.3.7 (correccion 4.7).
+     - Comprobar especificamente el ULTIMO addon normal de la lista, que en
+       3.3.7 quedaba fuera de la logica de proteccion (correccion 4.3).
+
+12.6 Proteccion de addons
+     - Marcar un addon como protegido con el icono de escudo.
+     - Disable All: el addon protegido debe seguir activo.
+     - /reload: debe seguir activo.
+     - Desactivar un addon protegido manualmente y volver a entrar: debe
+       aparecer el popup de addons protegidos no cargados.
+
+12.7 Conjuntos
+     - Sets > Save sobre un hueco, comprobar el mensaje.
+     - Load, Add to current selection y Remove from current selection.
+     - Rename con un nombre nuevo, y despues Rename dejando el campo VACIO: el
+       mensaje debe decir "Set 1" y no "[nil]" (correccion 5.4).
+     - Conjunto de clase y conjunto Default.
+     - IMPORTANTE: probar con un ACP_Data creado por 3.3.7 y verificar que los
+       conjuntos guardados siguen intactos.
+
+12.8 Categorias y ordenacion
+     - Recorrer los seis criterios del desplegable. Deben salir siempre en el
+       mismo orden y traducidos.
+     - Plegar y desplegar categorias; el contador entre parentesis debe
+       aparecer sobre la fila plegada.
+     - Collapse All / expand all con el boton de lupa.
+     - /reload y comprobar que el criterio elegido se conservo.
+     - Con datos de 3.3.7 en un cliente aleman, frances, espanol, ruso, coreano
+       o chino: comprobar que el criterio guardado se migra en lugar de
+       perderse (correccion 4.14).
+
+12.9 Carga bajo demanda
+     - Localizar un addon LoD desactivado: debe mostrarse el boton Load.
+     - Pulsarlo y comprobar que carga y que el estado cambia.
+     - Comprobar el estado verde "Cargable bajo demanda".
+
+12.10 Dependencias ausentes e incompatibles
+     - Renombrar la carpeta de una dependencia y comprobar que el addon
+       dependiente aparece con estado en ROJO. En 3.3.7 salia en naranja
+       (correccion 4.4).
+     - Poner en un addon de prueba ## X-Min-Interface: 40000 y comprobar que
+       ACP lo marca como incompatible y que el tooltip dice Compatible: No.
+     - Comprobar que la linea Status del tooltip ahora tiene texto; en 3.3.7
+       salia vacia (correccion 4.5).
+     - Los dos mensajes de error de GetAddonIndex() no se pueden provocar
+       desde la interfaz: las llamadas internas usan noerr = true. Quedan
+       localizados como red de seguridad, no hay prueba manual para ellos.
+
+12.11 Casilla Recursive
+     - Abrir la ventana: la casilla debe reflejar el valor guardado ya en la
+       primera apertura (correccion 4.8).
+     - Con la ventana ABIERTA, escribir /acp norecurse: la casilla debe cambiar
+       en el acto y el mensaje del chat debe coincidir (correccion 5.3).
+     - Con la ventana CERRADA, escribir /acp norecurse y despues abrirla: la
+       casilla debe reflejar el nuevo valor.
+     - Marcar y desmarcar la casilla a mano y comprobar que /acp norecurse
+       sigue coincidiendo.
+
+12.12 Comandos
+     - /acp help
+     - /acp nochildren, /acp norecurse, /acp debug: los mensajes deben usar
+       ON/OFF traducidos (SI/NO en espanol), no true / false ni el plural
+       ACTIVADOS.
+
+12.14 Selector de idioma  (el motivo de esta pasada)
+     - /acp locale sin argumento: debe listar idioma detectado, idioma
+       efectivo y seleccion manual.
+     - /acp locale ptbr en minusculas: debe aceptarse y guardar ptBR.
+     - Comprobar que la ventana cambia de idioma en el acto en botones,
+       casilla Recursive y desplegables, y que las filas de la lista se
+       actualizan al recargar o al reabrir la ventana.
+     - Pulsar "Mas tarde" en el popup, hacer /reload manualmente y comprobar
+       que el idioma elegido sigue aplicado.
+     - /acp locale klingon: debe rechazarse sin guardar nada.
+     - /acp locale auto: vuelve al idioma detectado.
+     - /acp language debe comportarse igual que /acp locale.
+     - IMPORTANTE, no se pudo verificar fuera del cliente: comprobar que el
+       desplegable de idioma se dibuja con el ancho correcto y no se solapa
+       con el de ordenacion ni con el boton de cerrar. La llamada
+       UIDropDownMenu_SetWidth(frame, ancho) usa la firma de WotLK; si el
+       servidor tuviera un FrameXML modificado con la firma antigua, saltaria
+       un error de Lua al abrir la ventana.
+     - Pasar el raton por el desplegable de idioma: el tooltip debe mostrar la
+       palabra generica traducida, y el desplegable cerrado el nombre nativo.
+     - Abrir el menu y comprobar que los 13 idiomas salen en su forma nativa
+       aunque ACP este en otro idioma.
+     - Elegir un idioma que no se entienda y comprobar que se puede volver
+       reconociendo el nombre nativo o con /acp locale auto.
+     - Probar con un ACP_Data de 3.3.7: no debe haber ningun error y el
+       selector debe mostrar Automatic.
+
+12.13 Convivencia
+     - Probar con LibStub presente y ausente.
+     - Probar con addons multiparte (DBM-*, CT_*, prefijos con + ! _) para
+       verificar que el agrupamiento por nombre no cambio.
+
+================================================================================

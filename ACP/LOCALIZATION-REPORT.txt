@@ -1,0 +1,460 @@
+==============================================================================
+ACP 3.3.8-WotLK  -  LOCALIZATION AND INTEGRITY REPORT
+==============================================================================
+
+Files in the addon folder      : 22
+  Lua files                    : 17
+    loaded by ACP.toc          : 15
+    present but not loaded     : 2  (ACP-SelfTest.lua, localization-template.lua)
+  Non Lua files                : 5  (toc, xml, txt)
+
+Canonical locale : enUS
+Canonical keys   : 109
+
+------------------------------------------------------------------------------
+1. KEY MATRIX
+------------------------------------------------------------------------------
+code     keys  missing  extra  bad %s/%d  empty  = English
+enUS      109        0      0          0      0        109
+enGB      109        0      0          0      0        108
+enCN      109        0      0          0      0        109
+deDE      109        0      0          0      0          8
+frFR      109        0      0          0      0          7
+esES      109        0      0          0      0          8
+esMX      109        0      0          0      0          8
+ptBR      109        0      0          0      0          7
+itIT      109        0      0          0      0          4
+ruRU      109        0      0          0      0          2
+koKR      109        0      0          0      0          2
+zhCN      109        0      0          0      0          2
+zhTW      109        0      0          0      0          2
+
+------------------------------------------------------------------------------
+2. STRINGS IDENTICAL TO ENGLISH (for review, not necessarily an error)
+------------------------------------------------------------------------------
+enUS: 109  (expected, this is an English locale)
+enGB: 108  (expected, this is an English locale)
+enCN: 109  (expected, this is an English locale)
+deDE: 8
+    AddOns
+    Sets
+    Ace2
+    Blizzard
+    Set %d
+    Version
+    Status
+    Blizzard_ArenaUI
+frFR: 7
+    AddOns
+    Sets
+    Ace2
+    Blizzard
+    Set %d
+    Version
+    Compatible
+esES: 8
+    AddOns
+    Sets
+    Ace2
+    Blizzard
+    Set %d
+    Compatible
+    Blizzard_ArenaUI
+    Blizzard_MacroUI
+esMX: 8
+    AddOns
+    Sets
+    Ace2
+    Blizzard
+    Set %d
+    Compatible
+    Blizzard_ArenaUI
+    Blizzard_MacroUI
+ptBR: 7
+    AddOns
+    Sets
+    Ace2
+    Blizzard
+    Set %d
+    Blizzard_ArenaUI
+    Blizzard_MacroUI
+itIT: 4
+    Ace2
+    Blizzard
+    Set %d
+    Blizzard_ArenaUI
+ruRU: 2
+    Ace2
+    Blizzard
+koKR: 2
+    Ace2
+    Blizzard
+zhCN: 2
+    Ace2
+    Blizzard
+zhTW: 2
+    Ace2
+    Blizzard
+
+------------------------------------------------------------------------------
+3. ENCODING  (22 files)
+------------------------------------------------------------------------------
+ACP-Locale.lua                   utf-8 ok, no BOM, 510 CRLF 
+ACP-SelfTest.lua                 utf-8 ok, no BOM, 954 CRLF 
+ACP.lua                          utf-8 ok, no BOM, 2473 CRLF 
+ACP.toc                          utf-8 ok, no BOM, 50 CRLF 
+ACP.xml                          utf-8 ok, no BOM, 710 CRLF 
+CHANGELOG-ACP-3.3.8-WotLK.txt    utf-8 ok, no BOM, 965 CRLF 
+Changelog-ACP-3.3.7.txt          utf-8 ok, no BOM, 0 CRLF <-- 8 bare LF line(s)
+LOCALIZATION-REPORT.txt          utf-8 ok, no BOM, 460 CRLF 
+localization-deDE.lua            utf-8 ok, no BOM, 152 CRLF 
+localization-enCN.lua            utf-8 ok, no BOM, 152 CRLF 
+localization-enGB.lua            utf-8 ok, no BOM, 152 CRLF 
+localization-enUS.lua            utf-8 ok, no BOM, 152 CRLF 
+localization-esES.lua            utf-8 ok, no BOM, 152 CRLF 
+localization-esMX.lua            utf-8 ok, no BOM, 152 CRLF 
+localization-frFR.lua            utf-8 ok, no BOM, 152 CRLF 
+localization-itIT.lua            utf-8 ok, no BOM, 152 CRLF 
+localization-koKR.lua            utf-8 ok, no BOM, 152 CRLF 
+localization-ptBR.lua            utf-8 ok, no BOM, 152 CRLF 
+localization-ruRU.lua            utf-8 ok, no BOM, 152 CRLF 
+localization-template.lua        utf-8 ok, no BOM, 186 CRLF 
+localization-zhCN.lua            utf-8 ok, no BOM, 152 CRLF 
+localization-zhTW.lua            utf-8 ok, no BOM, 152 CRLF 
+
+------------------------------------------------------------------------------
+4. TOC CONSISTENCY
+------------------------------------------------------------------------------
+Files listed in ACP.toc: 16  (15 Lua + ACP.xml)
+   ACP-Locale.lua                 found
+   localization-enUS.lua          found
+   localization-enGB.lua          found
+   localization-enCN.lua          found
+   localization-deDE.lua          found
+   localization-frFR.lua          found
+   localization-esES.lua          found
+   localization-esMX.lua          found
+   localization-ptBR.lua          found
+   localization-itIT.lua          found
+   localization-ruRU.lua          found
+   localization-koKR.lua          found
+   localization-zhCN.lua          found
+   localization-zhTW.lua          found
+   ACP.lua                        found
+   ACP.xml                        found
+Lua files deliberately NOT loaded: ACP-SelfTest.lua, localization-template.lua
+Interface        : 30300
+Version          : 3.3.8-WotLK
+SavedVariables   : ACP_Data
+Title            : Addon Control Panel
+X-Compatible-With : absent (removed on purpose)
+Notes lines      : 11  (default, deDE, frFR, esES, esMX, ptBR, itIT, ruRU, koKR, zhCN, zhTW)
+
+------------------------------------------------------------------------------
+5. FORBIDDEN / MODERN API SCAN  (files loaded by ACP.toc only)
+------------------------------------------------------------------------------
+   none found
+   note: ACP-SelfTest.lua is a command line harness, never read by WoW, and is
+   excluded from this scan on purpose.
+
+------------------------------------------------------------------------------
+6. LUA COMPILATION AND 5.1 COMPATIBILITY
+------------------------------------------------------------------------------
+Interpreter used in the build environment: Lua 5.3 (LuaTeX texlua)
+WoW 3.3.5a runs Lua 5.1, so every file is ALSO scanned for syntax that
+only exists in 5.2+ and would therefore not transfer.
+
+   ACP-Locale.lua                   compiles
+   ACP-SelfTest.lua                 compiles
+   ACP.lua                          compiles
+   localization-deDE.lua            compiles
+   localization-enCN.lua            compiles
+   localization-enGB.lua            compiles
+   localization-enUS.lua            compiles
+   localization-esES.lua            compiles
+   localization-esMX.lua            compiles
+   localization-frFR.lua            compiles
+   localization-itIT.lua            compiles
+   localization-koKR.lua            compiles
+   localization-ptBR.lua            compiles
+   localization-ruRU.lua            compiles
+   localization-template.lua        compiles
+   localization-zhCN.lua            compiles
+   localization-zhTW.lua            compiles
+
+   No 5.2+ only construct outside string literals in any file.
+   (| appears only inside |cffxxxxxx colour codes, which are strings.)
+
+------------------------------------------------------------------------------
+7. GLOBALS DEFINED BY ACP.lua
+------------------------------------------------------------------------------
+Every name assigned at statement level, including the extra targets of a
+multiple assignment, so that overwriting a pre-existing global such as _
+is reported and not only the creation of a new one.
+
+   ACP                      intentional
+   ACP_EnableRecurse        intentional
+   ACP_LINEHEIGHT           intentional
+   SLASH_ACP1               intentional
+
+------------------------------------------------------------------------------
+8. L[...] KEYS USED BY THE CODE vs THE enUS TABLE
+------------------------------------------------------------------------------
+Distinct literal keys requested by the code : 69
+Requested but absent from enUS              : none
+
+Keys defined in enUS but never requested with a literal L["..."].
+They are resolved dynamically (categories, sorters, Blizzard folder
+names) or reserved for code that is currently commented out:
+    *** Enabling <%s> %s your UI ***
+    *** Unknown AddOn <%s> required ***
+    Ace2
+    AddOn <%s> is not valid.
+    Blizzard
+    Blizzard AddOns
+    Blizzard_AchievementUI
+    Blizzard_ArenaUI
+    Blizzard_AuctionUI
+    Blizzard_BarbershopUI
+    Blizzard_BattlefieldMinimap
+    Blizzard_BindingUI
+    Blizzard_Calendar
+    Blizzard_CombatLog
+    Blizzard_CombatText
+    Blizzard_DebugTools
+    Blizzard_GMChatUI
+    Blizzard_GMSurveyUI
+    Blizzard_GlyphUI
+    Blizzard_GuildBankUI
+    Blizzard_InspectUI
+    Blizzard_ItemSocketingUI
+    Blizzard_MacroUI
+    Blizzard_RaidUI
+    Blizzard_TalentUI
+    Blizzard_TimeManager
+    Blizzard_TokenUI
+    Blizzard_TradeSkillUI
+    Blizzard_TrainerUI
+    Group By Name
+    Libraries
+    Load on Demand AddOns
+    Loaded
+    Loaded on demand.
+    Reload
+    Separate LoD List
+    Standard AddOns
+    Titles
+    Undefined
+    Unknown
+
+------------------------------------------------------------------------------
+9. ACP 3.3.7 LOCALIZATION KEY COVERAGE
+------------------------------------------------------------------------------
+Keys defined by ACP 3.3.7 localization-enUS.lua : 65
+Keys defined by ACP 3.3.8 localization-enUS.lua : 109
+Keys 3.3.7 defined that 3.3.8 no longer asks for: 22
+   handled by LEGACY_LOCALE_KEY_ALIASES : 17
+   handled as a special case            : 3  (Set , and the two
+                                             halves of the tooltip)
+   dropped on purpose                   : 2  (Blizzard_FeedbackUI, Blizzard_VehicleUI)
+   NOT covered                          : none
+   none of the old keys leaked into the 13 canonical files.
+
+------------------------------------------------------------------------------
+10. SORTER MIGRATION CHECKED AGAINST THE REAL 3.3.7 SOURCE
+------------------------------------------------------------------------------
+Distinct sorter names extracted from ACP 3.3.7 ACP.lua: 30
+   OK all 30 names migrate to a live builder
+   unknown value returns nil: true
+
+------------------------------------------------------------------------------
+11. HEADER ROW GEOMETRY  (language selector placement)
+------------------------------------------------------------------------------
+Window width                     : 640
+Sort drop down                   : x 45 .. 210   (y -22)
+Language drop down               : x 210 .. 430   (y -22)
+Close button                     : x 566 .. 598   (y -3)
+
+Same line as the sort drop down  : yes
+Gap between the two drop downs   : 0 px
+Room left before the close button: 136 px
+
+Bottom row buttons are anchored to BOTTOMLEFT / BOTTOMRIGHT and the
+Recursive check button hangs off Enable All, so none of them share this
+row. The collapse all button sits at x 20..36, left of both drop downs.
+
+------------------------------------------------------------------------------
+12. AUTOMATED BEHAVIOUR TESTS  (ACP-SelfTest.lua, executed)
+------------------------------------------------------------------------------
+   ACP 3.3.8-WotLK self test
+   Lua: Lua 5.3   folder: ./
+   
+   1. A key read before UpdateLocale must change afterwards
+     PASS  read, then UpdateLocale, then read again
+     PASS  the value really was translated before the override
+     PASS  active locale wins
+     PASS  enUS fallback for a key the language lacks
+     PASS  unknown key falls back to the key itself
+     PASS  RegisterLocale also invalidates
+   
+   2. An unknown locale falls back to enUS
+     PASS  no file registered for the detected locale
+     PASS  GetDetectedLocale reports what WoW said
+     PASS  the effective locale falls back to enUS
+     PASS  strings come from enUS
+     PASS  no table was invented for the unknown code
+     PASS  GetLocaleString reads the effective locale
+     PASS  unknown key still returns the key
+     PASS  the warning is emitted once and only once
+     PASS  the warning names the locale and the fallback
+     PASS  a known locale produces no warning
+     PASS  an unresolved key is reported once while debugging
+     PASS  the report itself is translated
+     PASS  and it is not repeated
+     PASS  ReportMissingLocaleKeys finds it
+     PASS  nothing is printed when debugging is off
+   
+   3. Clearing a set name shows Set N, not nil
+     PASS  naming a set is reported
+     PASS  the new name is Set 1
+     PASS  nil never reaches the message
+     PASS  GetSetName agrees
+     PASS  and for another slot
+   
+   4. Every sorter name saved by 3.3.7 still migrates
+     PASS  35 historic values map to a live builder
+     PASS  a current key maps to itself
+     PASS  the renamed key is reachable
+     PASS  an unknown value returns nil so the caller uses the default
+     PASS  a non string returns nil
+   
+   5. /acp norecurse drives the same code as the check button
+     PASS  toggle 1: check button matches the message
+     PASS  toggle 2: check button matches the message
+     PASS  toggle 3: check button matches the message
+     PASS  toggle 4: check button matches the message
+     PASS  consecutive toggles alternate
+     PASS  two toggles return to the starting state
+     PASS  ToggleRecursion(true) leaves the box checked
+     PASS  ToggleRecursion(false) leaves the box unchecked
+     PASS  the slash command flips what the button had just set
+     PASS  works with the window never created
+   
+   6. All 13 languages share keys and placeholders
+     PASS  enUS loaded
+           enUS defines 109 keys
+     PASS  enUS: 109 keys, no missing / extra / empty / placeholder issue
+     PASS  enGB: 109 keys, no missing / extra / empty / placeholder issue
+     PASS  enCN: 109 keys, no missing / extra / empty / placeholder issue
+     PASS  deDE: 109 keys, no missing / extra / empty / placeholder issue
+     PASS  frFR: 109 keys, no missing / extra / empty / placeholder issue
+     PASS  esES: 109 keys, no missing / extra / empty / placeholder issue
+     PASS  esMX: 109 keys, no missing / extra / empty / placeholder issue
+     PASS  ptBR: 109 keys, no missing / extra / empty / placeholder issue
+     PASS  itIT: 109 keys, no missing / extra / empty / placeholder issue
+     PASS  ruRU: 109 keys, no missing / extra / empty / placeholder issue
+     PASS  koKR: 109 keys, no missing / extra / empty / placeholder issue
+     PASS  zhCN: 109 keys, no missing / extra / empty / placeholder issue
+     PASS  zhTW: 109 keys, no missing / extra / empty / placeholder issue
+   
+   7. An ACP 3.3.7 translation table still translates 3.3.8
+     PASS  the four assertions from the review
+     PASS  ReloadUI -> Reload UI
+     PASS  Embeds -> Embedded Libraries
+     PASS  Active Embeds -> Active Embedded Libraries falls back cleanly
+     PASS  Addons [%s] Saved. -> AddOn set [%s] saved.
+     PASS  Set  -> Set %d keeps the placeholder
+     PASS  dependancies typo key is mapped
+     PASS  LoD message keeps its %s
+     PASS  the split tooltip is merged
+     PASS  no double space and no nil in the merged tooltip
+     PASS  the 3.3.7 key is still available
+     PASS  an explicit new key beats the alias
+     PASS  half a tooltip is still a string
+     PASS  canonical esES is untouched by the aliases
+   
+   8. A normal addon named like a locale key keeps its title
+     PASS  the locale really would collide
+     PASS  folder 'Author' keeps its real title
+     PASS  an ordinary addon is unaffected
+     PASS  a Blizzard row by index is still localized
+     PASS  a Blizzard row by folder name is still localized
+     PASS  folder 'Status' keeps its real title
+     PASS  folder 'Default' keeps its real title
+     PASS  folder 'Libraries' keeps its real title
+     PASS  folder 'Reload' keeps its real title
+     PASS  folder 'Unknown' keeps its real title
+   
+   9. OnLoad does not touch the global _
+     PASS  OnLoad runs
+     PASS  the global _ was not written
+     PASS  playerClass was still captured
+     PASS  the slash command was registered
+   
+   10. Manual language selection
+     PASS  a fresh ACP_Data has no localeOverride
+     PASS  no override means the detected locale
+     PASS  RestoreLocaleOverride applies it
+     PASS  the detected locale is still enUS
+     PASS  the effective locale is ptBR
+     PASS  strings really come from ptBR
+     PASS  an unknown override is refused
+     PASS  and the fallback is safe
+     PASS  the stored value is left alone so the file can come back
+     PASS  a language can be set
+     PASS  auto clears the stored override
+     PASS  auto goes back to the detected locale
+     PASS  ptbr normalizes to ptBR
+     PASS  eses normalizes to esES
+     PASS  ZHTW normalizes to zhTW
+     PASS  surrounding spaces are ignored
+     PASS  selecting ptbr stores exactly ptBR
+     PASS  an unregistered code is refused
+     PASS  and nothing is written to ACP_Data
+     PASS  the effective locale did not move
+     PASS  the refusal is reported in the user language
+     PASS  an old ACP_Data restores without error
+     PASS  and ACP still works
+     PASS  no field of the old ACP_Data was touched
+     PASS  localeOverride is still absent
+     PASS  all 13 languages are registered and selectable
+     PASS  every registered language can be selected
+   
+   11. The language drop down in the window
+     PASS  the menu has automatic plus the 13 languages
+     PASS  the first entry is Automatic with the detected code
+     PASS  automatic is checked when there is no override
+     PASS  ptBR shows its native name
+     PASS  deDE shows its native name
+     PASS  ruRU shows its native name
+     PASS  esMX shows its native name
+     PASS  every entry carries a real locale code as its value
+     PASS  choosing ptBR stores exactly ptBR
+     PASS  the popup opened
+     PASS  the popup mentions the reload
+     PASS  the closed drop down shows the native name of the new language
+     PASS  the drop down selection follows ACP_Data
+     PASS  Reload now calls ReloadUI()
+     PASS  ptBR is now the checked entry
+     PASS  automatic clears the override
+     PASS  and the closed drop down goes back to the detected language
+     PASS  the tooltip shows the generic word translated
+     PASS  and the drop down text stays native
+   
+   129 passed, 0 failed
+
+------------------------------------------------------------------------------
+13. RESULT
+------------------------------------------------------------------------------
+No issue found.
+
+Scope of this report:
+  - Static checks (keys, placeholders, encoding, TOC, API scan, globals).
+  - Real Lua compilation of every .lua file, plus a scan for 5.2+ only
+    syntax so that the result transfers to the Lua 5.1 of WoW 3.3.5a.
+  - Real execution of the logic tests in ACP-SelfTest.lua.
+
+NOT covered: nothing here ran inside a World of Warcraft 3.3.5a client.
+Rendering, frame layout, button widths, event order and the WoW API
+itself were not exercised. See the in game test plan in
+CHANGELOG-ACP-3.3.8-WotLK.txt.

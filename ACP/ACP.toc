@@ -1,0 +1,52 @@
+## Interface: 30300
+## X-Since-Interface: 30300
+
+## Title: Addon Control Panel
+## Author: sylvanaar, Rophy, Saien
+## X-Maintainer: Mapache-Warmane2077
+## X-Edition: WotLK 3.3.5a Community Edition 2026
+## X-Website: https://github.com/Mapache-Warmane2077/ACP-WotLK-3.3.5a
+## X-License: MIT
+## Version: 3.3.8-WotLK
+## SavedVariables: ACP_Data
+
+## Notes: Adds an AddOn manager in game via the 'AddOns' button of the game menu. Special support for multi-part AddOns. Based on rMCP by Rophy.
+## Notes-deDE: Fügt über die Schaltfläche 'AddOns' im Spielmenü einen AddOn-Manager hinzu. Besondere Unterstützung für mehrteilige AddOns. Basiert auf rMCP von Rophy.
+## Notes-frFR: Ajoute un gestionnaire d'AddOns en jeu via le bouton 'AddOns' du menu de jeu. Prise en charge particulière des AddOns en plusieurs parties. Basé sur rMCP de Rophy.
+## Notes-esES: Añade un gestor de AddOns en el juego mediante el botón 'AddOns' del menú de juego. Soporte especial para AddOns de varias partes. Basado en rMCP de Rophy.
+## Notes-esMX: Agrega un gestor de AddOns en el juego mediante el botón 'AddOns' del menú de juego. Soporte especial para AddOns de varias partes. Basado en rMCP de Rophy.
+## Notes-ptBR: Adiciona um gerenciador de AddOns no jogo pelo botão 'AddOns' do menu do jogo. Suporte especial a AddOns de várias partes. Baseado no rMCP de Rophy.
+## Notes-itIT: Aggiunge un gestore di AddOn nel gioco tramite il pulsante 'AddOn' del menu di gioco. Supporto speciale per AddOn in più parti. Basato su rMCP di Rophy.
+## Notes-ruRU: Добавляет менеджер аддонов в игре через кнопку 'Аддоны' игрового меню. Особая поддержка аддонов из нескольких частей. Основан на rMCP от Rophy.
+## Notes-koKR: 게임 메뉴의 '애드온' 버튼으로 애드온 관리창을 엽니다. 여러 부분으로 나뉘어진 애드온을 특별히 지원합니다. Rophy의 rMCP를 기반으로 합니다.
+## Notes-zhCN: 在游戏菜单的“插件”按钮中提供插件管理面板，并特别支持多部分组成的插件。基于 Rophy 的 rMCP。
+## Notes-zhTW: 在遊戲選單的「插件」按鈕中提供插件管理面板，並特別支援多部分組成的插件。以 Rophy 的 rMCP 為基礎。
+
+## X-Credits: ACP is based on rMCP, which is MCP modified by Rophy, originally by Saien.
+## X-Category: Interface Enhancements
+# Languages that ship a complete translation. Any other locale code is still
+# accepted by the localization core, but falls back to enUS.
+## X-Localizations: enUS, enGB, enCN, deDE, frFR, esES, esMX, ptBR, itIT, ruRU, koKR, zhCN, zhTW
+
+# Localization core. Must stay first: it creates ACP and ACP:RegisterLocale().
+ACP-Locale.lua
+
+# One file per language. enUS is the canonical source and the fallback.
+# localization-template.lua and ACP-SelfTest.lua are NOT loaded here.
+localization-enUS.lua
+localization-enGB.lua
+localization-enCN.lua
+localization-deDE.lua
+localization-frFR.lua
+localization-esES.lua
+localization-esMX.lua
+localization-ptBR.lua
+localization-itIT.lua
+localization-ruRU.lua
+localization-koKR.lua
+localization-zhCN.lua
+localization-zhTW.lua
+
+# Core and interface.
+ACP.lua
+ACP.xml
