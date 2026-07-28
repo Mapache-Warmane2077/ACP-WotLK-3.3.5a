@@ -1,47 +1,48 @@
 # ACP 3.3.8-WotLK
 
-**Unofficial community-maintained edition of Addon Control Panel for World of Warcraft 3.3.5a.**
+**Edición comunitaria no oficial de Addon Control Panel para World of Warcraft 3.3.5a.**
 
-ACP 3.3.8-WotLK preserves and updates the classic Addon Control Panel experience specifically for the World of Warcraft 3.3.5a client.
+ACP 3.3.8-WotLK conserva y actualiza la experiencia clásica de Addon Control Panel, manteniendo la compatibilidad con el cliente de World of Warcraft 3.3.5a y con los datos guardados por ACP 3.3.7.
 
-This project is not affiliated with or maintained by the current official ACP project team.
+Este proyecto no está afiliado ni mantenido por el equipo actual del proyecto oficial ACP.
 
 ---
 
-## Compatibility
+## Compatibilidad
 
 - World of Warcraft 3.3.5a
-- Interface version `30300`
+- Interfaz `30300`
 - Lua 5.1
-- Compatible with existing `ACP_Data` SavedVariables from ACP 3.3.7
-- No Retail, modern Classic or Cataclysm Classic API is used
+- Compatible con los datos guardados de `ACP_Data` de ACP 3.3.7
+- No utiliza API modernas de Retail, Classic actual ni Cataclysm Classic
 
 ---
 
-## Main features
+## Funciones principales
 
-- Enable and disable AddOns without returning to the character selection screen
-- Load AddOns marked as Load on Demand
-- Protect important AddOns from being disabled
-- Save and restore AddOn sets
-- Group and sort AddOns using different criteria
-- Display dependencies, embedded libraries, status and compatibility information
-- Automatically enable required dependencies
-- Built-in localization system with safe English fallback
-- Automatic language detection for official WoW clients
-- Manual language selection for community-translated clients
-- Visual language selector inside the ACP window
-- Compatibility with localization files written for ACP 3.3.7
+- Activar y desactivar AddOns sin volver a la pantalla de selección de personaje.
+- Cargar AddOns marcados como carga bajo demanda.
+- Proteger AddOns importantes para evitar que sean desactivados.
+- Guardar, cargar y renombrar conjuntos de AddOns.
+- Ordenar y agrupar AddOns mediante distintos criterios.
+- Mostrar dependencias, bibliotecas embebidas, estado y compatibilidad.
+- Activar automáticamente las dependencias necesarias.
+- Sistema de localización centralizado con fallback seguro al inglés.
+- Detección automática del idioma en clientes oficiales.
+- Selección manual de idioma para clientes con traducciones comunitarias.
+- Selector visual de idioma dentro de la ventana de ACP.
+- Compatibilidad con archivos de traducción creados para ACP 3.3.7.
+- Corrección de varios errores heredados del addon original.
 
 ---
 
-## Languages
+## Idiomas incluidos
 
-ACP includes complete translations for:
+ACP incluye traducciones completas para:
 
 - `enUS` — English
 - `enGB` — English (United Kingdom)
-- `enCN` — English for Chinese community clients
+- `enCN` — English para clientes chinos comunitarios
 - `deDE` — Deutsch
 - `frFR` — Français
 - `esES` — Español (España)
@@ -53,17 +54,17 @@ ACP includes complete translations for:
 - `zhCN` — 简体中文
 - `zhTW` — 繁體中文
 
-Official client languages are selected automatically through `GetLocale()`.
+Los idiomas oficiales se seleccionan automáticamente mediante `GetLocale()`.
 
-Community-translated clients may still identify themselves as `enUS`. In that case, use the language selector in the ACP window or one of the commands below.
+Algunos clientes traducidos por la comunidad continúan identificándose como `enUS`. En esos casos, utiliza el selector de idioma dentro de ACP o los comandos indicados a continuación.
 
 ---
 
-## Manual language selection
+## Selección manual de idioma
 
-Open ACP and use the language dropdown next to the sorting dropdown.
+Abre ACP y utiliza el desplegable de idioma situado junto al selector de ordenación.
 
-You can also use:
+También puedes utilizar:
 
 ```text
 /acp locale
@@ -73,43 +74,43 @@ You can also use:
 /acp locale auto
 ```
 
-Examples:
+Ejemplo:
 
 ```text
 /acp locale ptBR
 ```
 
-Forces Portuguese (Brazil).
+Fuerza el uso de portugués de Brasil.
 
 ```text
 /acp locale auto
 ```
 
-Returns ACP to automatic language detection.
+Elimina el idioma forzado y vuelve a la detección automática.
 
-The command alias `/acp language` is also supported.
+También se acepta `/acp language` como alias de `/acp locale`.
 
 ---
 
-## Installation
+## Instalación
 
-1. Download the latest release.
-2. Extract the archive.
-3. Copy the folder named `ACP` into:
+1. Descarga la versión más reciente desde la sección **Releases**.
+2. Extrae el archivo ZIP.
+3. Copia la carpeta `ACP` dentro de:
 
 ```text
 World of Warcraft\Interface\AddOns\
 ```
 
-The final path must look like:
+La ruta final debe quedar así:
 
 ```text
 World of Warcraft\Interface\AddOns\ACP\ACP.toc
 ```
 
-4. Start World of Warcraft.
-5. Enable Addon Control Panel in the AddOns list.
-6. Open ACP from the game menu or use:
+4. Inicia World of Warcraft.
+5. Activa Addon Control Panel desde la lista de AddOns.
+6. Abre ACP desde el menú del juego o mediante:
 
 ```text
 /acp
@@ -117,23 +118,27 @@ World of Warcraft\Interface\AddOns\ACP\ACP.toc
 
 ---
 
-## Updating from ACP 3.3.7
+## Actualización desde ACP 3.3.7
 
-ACP 3.3.8-WotLK preserves the existing `ACP_Data` SavedVariables structure and keeps saved AddOn sets.
+ACP 3.3.8-WotLK conserva la estructura de `ACP_Data` y mantiene los conjuntos de AddOns guardados.
 
-Creating a backup before updating is still recommended:
+Antes de actualizar se recomienda crear una copia de seguridad de:
 
 ```text
-WTF\Account\<ACCOUNT>\SavedVariables\ACP.lua
+WTF\Account\<CUENTA>\SavedVariables\ACP.lua
 ```
 
-Replace the old `Interface\AddOns\ACP` folder with the new one.
+Reemplaza completamente la carpeta antigua:
 
-Do not merge old and new files inside the same folder.
+```text
+Interface\AddOns\ACP
+```
+
+No mezcles archivos de versiones diferentes dentro de la misma carpeta.
 
 ---
 
-## Commands
+## Comandos
 
 ```text
 /acp
@@ -142,99 +147,101 @@ Do not merge old and new files inside the same folder.
 /acp norecurse
 /acp debug
 /acp locale
-/acp locale <code>
+/acp locale <código>
 /acp locale auto
-/acp language <code>
+/acp language <código>
 ```
 
-### Command descriptions
+### Descripción de los comandos
 
-- `/acp` — Opens or closes Addon Control Panel.
-- `/acp help` — Displays the available commands.
-- `/acp nochildren` — Toggles Load on Demand child AddOn handling.
-- `/acp norecurse` — Toggles recursive dependency enabling.
-- `/acp debug` — Toggles localization debugging messages.
-- `/acp locale` — Displays the detected and effective ACP language.
-- `/acp locale <code>` — Forces a registered language.
-- `/acp locale auto` — Returns to automatic language detection.
-- `/acp language <code>` — Alias for `/acp locale <code>`.
+- `/acp` — Abre o cierra Addon Control Panel.
+- `/acp help` — Muestra los comandos disponibles.
+- `/acp nochildren` — Activa o desactiva el tratamiento de AddOns hijos de carga bajo demanda.
+- `/acp norecurse` — Activa o desactiva la activación recursiva de dependencias.
+- `/acp debug` — Activa o desactiva los mensajes de depuración de localización.
+- `/acp locale` — Muestra el idioma detectado y el idioma utilizado por ACP.
+- `/acp locale <código>` — Fuerza uno de los idiomas registrados.
+- `/acp locale auto` — Vuelve a la detección automática.
+- `/acp language <código>` — Alias de `/acp locale <código>`.
 
 ---
 
-## Recursive option
+## Opción Recursive
 
-When **Recursive** is enabled, activating an AddOn also enables its required dependencies and related embedded libraries.
+Cuando **Recursive** está activado, al activar un AddOn ACP también intenta activar sus dependencias obligatorias y bibliotecas relacionadas.
 
-When it is disabled, ACP only enables the selected AddOn.
+Cuando está desactivado, ACP solo activa el AddOn seleccionado.
 
-The command:
+El comando:
 
 ```text
 /acp norecurse
 ```
 
-toggles the same option as the Recursive checkbox.
+cambia la misma opción que la casilla **Recursive**.
 
 ---
 
-## Testing
+## Pruebas
 
-The repository includes:
+El proyecto incluye:
 
 ```text
 ACP-SelfTest.lua
 ```
 
-This is a command-line test harness and is intentionally not loaded by World of Warcraft.
+Este archivo es una batería de pruebas ejecutable desde línea de comandos y no es cargado por World of Warcraft.
 
-The automated tests cover:
+Las pruebas automáticas comprueban, entre otras cosas:
 
-- Localization keys and placeholders
-- Language fallback behavior
-- Manual locale overrides
-- Legacy ACP 3.3.7 localization compatibility
-- SavedVariables compatibility
-- Sorter migration
-- AddOn title collisions
-- Recursive option synchronization
-- Language selector behavior
+- Claves y marcadores de localización.
+- Fallback de idiomas.
+- Selección manual y persistencia del idioma.
+- Compatibilidad con localizaciones de ACP 3.3.7.
+- Compatibilidad con `ACP_Data`.
+- Migración de criterios de ordenación.
+- Colisiones entre nombres de carpetas y claves traducibles.
+- Sincronización de la opción Recursive.
+- Funcionamiento del selector visual de idioma.
 
-Visual layout and real World of Warcraft API behavior must still be verified inside a WoW 3.3.5a client.
+La versión actual supera 129 comprobaciones automáticas.
 
----
-
-## Project status
-
-This project is maintained specifically for World of Warcraft 3.3.5a.
-
-It is not intended for:
-
-- Retail
-- Modern Classic
-- Cataclysm Classic
-- Later expansions
-- Clients using modern `C_AddOns` APIs
+El diseño visual y el comportamiento de la API real de World of Warcraft deben seguir verificándose dentro de un cliente 3.3.5a.
 
 ---
 
-## Credits
+## Estado del proyecto
 
-Original Addon Control Panel authors and contributors:
+Este proyecto se mantiene exclusivamente para World of Warcraft 3.3.5a.
+
+No está destinado a:
+
+- World of Warcraft Retail.
+- Classic moderno.
+- Cataclysm Classic.
+- Expansiones posteriores.
+- Clientes que utilizan la API moderna `C_AddOns`.
+
+---
+
+## Créditos
+
+Autores y colaboradores originales de Addon Control Panel:
 
 - sylvanaar
 - Rophy
 - Saien
 
-ACP is based on rMCP, which is MCP modified by Rophy and originally created by Saien.
+ACP está basado en rMCP, una modificación de MCP realizada por Rophy y creado originalmente por Saien.
 
-### WotLK 3.3.5a Community Edition maintainer
+### Mantenedor de la edición para WotLK 3.3.5a
 
 - Mapache-Warmane2077
 
 ---
 
-## License
+## Licencia
 
-Distributed under the MIT License.
+Distribuido bajo la licencia MIT.
 
-See the `LICENSE` file for details.
+Consulta el archivo `LICENSE` para obtener más información.
