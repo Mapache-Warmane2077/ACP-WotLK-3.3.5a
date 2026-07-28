@@ -1,8 +1,8 @@
 # ACP 3.3.8-WotLK
 
-**Edición comunitaria no oficial de Addon Control Panel para World of Warcraft 3.3.5a.**
-
 **Idiomas:** Español | [English](README.en.md)
+
+**Edición comunitaria no oficial de Addon Control Panel para World of Warcraft 3.3.5a.**
 
 ACP 3.3.8-WotLK conserva y actualiza la experiencia clásica de Addon Control Panel, manteniendo la compatibilidad con el cliente de World of Warcraft 3.3.5a y con los datos guardados por ACP 3.3.7.
 
@@ -17,6 +17,34 @@ Este proyecto no está afiliado ni mantenido por el equipo actual del proyecto o
 - Lua 5.1
 - Compatible con los datos guardados de `ACP_Data` de ACP 3.3.7
 - No utiliza API modernas de Retail, Classic actual ni Cataclysm Classic
+
+---
+
+## Mejoras de esta edición para WotLK
+
+En comparación con ACP 3.3.7, esta edición comunitaria incluye:
+
+- Sistema de localización reconstruido y centralizado.
+- Fallback seguro al inglés cuando una traducción no está disponible.
+- Detección automática de idiomas oficiales.
+- Selector manual para clientes con traducciones comunitarias.
+- Nuevo selector visual de idioma dentro de la ventana de ACP.
+- Selección de idioma persistente mediante `ACP_Data.localeOverride`.
+- Compatibilidad con archivos de traducción creados para ACP 3.3.7.
+- Identificadores internos de categorías y criterios de ordenación independientes del idioma.
+- Migración automática de los criterios de ordenación guardados por ACP 3.3.7.
+- Corrección de errores relacionados con:
+  - Tooltips y estados de AddOns.
+  - Dependencias ausentes.
+  - Detección de AddOns de Blizzard.
+  - Activación recursiva de dependencias.
+  - Activación masiva dentro de categorías plegadas.
+  - Renombrado de conjuntos guardados.
+  - Protección del último AddOn de la lista.
+  - Variables globales accidentales.
+  - Colisiones entre nombres de carpetas y claves de traducción.
+- Traducciones revisadas y corregidas.
+- 129 comprobaciones automáticas aprobadas.
 
 ---
 
