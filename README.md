@@ -1,7 +1,8 @@
 # ACP 3.3.8-WotLK
-**Idiomas:** Español | [English](README.en.md)
 
 **Edición comunitaria no oficial de Addon Control Panel para World of Warcraft 3.3.5a.**
+
+**Idiomas:** Español | [English](README.en.md)
 
 ACP 3.3.8-WotLK conserva y actualiza la experiencia clásica de Addon Control Panel, manteniendo la compatibilidad con el cliente de World of Warcraft 3.3.5a y con los datos guardados por ACP 3.3.7.
 
